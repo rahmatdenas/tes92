@@ -222,7 +222,7 @@ nav li a.active {
 #details figure img {
   display: block;
   border: 2px solid white;
-  width: 60px;
+  width: 150px;
 }
 
 #details figure img.loading {
@@ -321,7 +321,7 @@ nav li a.active {
 #about #eph, #kontrib #eph {
   float: right;
   margin: 0 0 10px 10px;
-  width: 150px;
+  width: 60px;
 }
 
 #about p, #kontrib p {
