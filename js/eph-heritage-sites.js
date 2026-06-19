@@ -547,7 +547,17 @@ function applyIntersectionFilter(preventZoom = false) {
   ol.innerHTML = '';
 
   let validMarkers = [];
-  
+  let btnAll = document.getElementById('btn-all');
+  if (btnAll) {
+    if (currentSearchQuery.trim() === '' && 
+        currentRegionFilter === 'all' && 
+        currentUsiaFilter === 'all' && 
+        activeFeatures.size === 0) {
+      btnAll.classList.add('active');
+    } else {
+      btnAll.classList.remove('active');
+    }
+  }
   let validRecords = Object.values(Records).filter(record => {
     let matchRegion = (currentRegionFilter === 'all' || record.areaTags.has(currentRegionFilter));
     let matchFeature = true;
