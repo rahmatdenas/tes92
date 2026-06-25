@@ -464,7 +464,7 @@ function generateFilterSelect() {
       selectRegion.appendChild(option);
     });
 
-  applyIntersectionFilter(true);
+  applyIntersectionFilter();
   
   if (!isFilterEventAttached) {
     
