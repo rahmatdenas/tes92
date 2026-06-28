@@ -539,7 +539,7 @@ function renderDynamicDataInPanel(qid) {
 
   if (record.kapasitas) {
     let formatAngka = parseInt(record.kapasitas).toLocaleString('id-ID');
-    html += `<p>Kapasitas: ${formatAngka}</p>`;
+    html += `<p>Kapasitas: ${formatAngka} orang</p>`;
   }
 
   let tautanTambah = `<p><a href="${wikiBaseUrl}" target="_blank" class="sunting-linktambah" title="Tambahkan data di Wikidata" style="font-style: italic;">Lengkapi data di Wikidata!</a></p>`;
