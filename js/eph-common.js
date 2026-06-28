@@ -198,7 +198,7 @@ L.control.locate({
   };
   powered.addTo(Map);
 
-  Cluster = new L.markerClusterGroup({
+Cluster = new L.markerClusterGroup({
     maxClusterRadius: function(z) {
       if (z <=  15) return 50;
       if (z === 16) return 40;
@@ -206,8 +206,38 @@ L.control.locate({
       if (z === 18) return 20;
       if (z >=  19) return 10;
     },
+    // MATIKAN KENDALI OTOMATIS BAWAAN
+    zoomToBoundsOnClick: false, 
+    spiderfyOnMaxZoom: false    
   }).addTo(Map);
-}
+
+  // KENDALIKAN MANUAL KLIK PADA KLASTER
+  Cluster.on('clusterclick', function (a) {
+    let cluster = a.layer;
+    let count = cluster.getChildCount();
+    
+    // Cek apakah batas ujung titik sama persis (menandakan koordinat bertumpuk sempurna)
+    let bounds = cluster.getBounds();
+    let isSamePoint = bounds.getSouthWest().equals(bounds.getNorthEast());
+    
+    let currentZoom = Map.getZoom();
+    let maxZoom = TILE_LAYER_MAX_ZOOM; 
+    
+    // Skenario 1: Jika sudah di zoom maksimal ATAU titiknya benar-benar bertumpuk
+    if (currentZoom >= maxZoom || isSamePoint) {
+      if (count > 60) {
+        // Cegah mekar, munculkan alert
+        alert(`Terlalu banyak data di titik ini (${count} item). Anda bisa melihatnya melalui menu daftar dan pilih wilayah terkait.`);
+      } else {
+        // Jika masih di bawah 60, izinkan mekar (spiderfy)
+        cluster.spiderfy();
+      }
+    } else {
+      // Normal: Peta belum mentok, izinkan zoom mendekat
+      Map.fitBounds(cluster.getBounds());
+    }
+  });
+  
 
 function queryWdqsThenProcess(query, processEachResult, postprocessCallback) {
   let promise = new Promise((resolve, reject) => {
@@ -327,15 +357,31 @@ function processHashChange() {
 function activateMapMarker(qid) {
   let record = Records[qid];
   if (!record.mapMarker) return; 
-  Cluster.zoomToShowLayer(
-    record.mapMarker,
-    function() {
-      Map.setView([record.lat, record.lon], Map.getZoom());
-      if (!record.popup.isOpen()) record.mapMarker.openPopup();
-    },
-  );
-}
 
+  // Hitung berapa banyak entitas yang berbagi koordinat persis dengan item ini
+  let countSameLocation = 0;
+  Object.values(Records).forEach(r => {
+    if (r.lat === record.lat && r.lon === record.lon) {
+      countSameLocation++;
+    }
+  });
+
+  // Skenario 2: Buka dari daftar, koordinat bertumpuk > 60
+  if (countSameLocation > 60) {
+    // Jangan gunakan zoomToShowLayer (karena memaksa spiderfy)
+    // Cukup tembak koordinatnya secara langsung tanpa membuka popup
+    Map.setView([record.lat, record.lon], TILE_LAYER_MAX_ZOOM);
+  } else {
+    // Skenario Normal: Jumlah aman, biarkan sistem mengurai klaster dan membuka popup
+    Cluster.zoomToShowLayer(
+      record.mapMarker,
+      function() {
+        Map.setView([record.lat, record.lon], Map.getZoom());
+        if (!record.popup.isOpen()) record.mapMarker.openPopup();
+      }
+    );
+  }
+}
 function displayPanelContent(id) {
   document.querySelectorAll('.panel-content').forEach(content => {
     content.style.display = (content.id === id) ? content.dataset.display : 'none';
