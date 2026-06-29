@@ -173,7 +173,7 @@ function getSparqlQuery6(qid) {
   }
 
   // 3. KONDISI KHUSUS PER KLASTER
-  if (klaster === 'Wilayah Administratif') {
+if (klaster === 'Wilayah Administratif') {
     selectClause += `(SAMPLE(?popData) AS ?populasi) (SAMPLE(?govData) AS ?kepalaDaerah) (SAMPLE(?webVal) AS ?lamanResmi) `;
     whereClause += `
       OPTIONAL { ?site wdt:P856 ?webVal . }
@@ -186,7 +186,15 @@ function getSparqlQuery6(qid) {
         ?site p:P6 ?govStmt . ?govStmt ps:P6 ?govItem . 
         ?govItem rdfs:label ?govLabel . FILTER(LANG(?govLabel) = "id")
         OPTIONAL { ?govStmt pq:P580 ?govDate . }
-        BIND(CONCAT(STR(?govLabel), "|", STR(YEAR(?govDate))) AS ?govData)
+        
+        # Lacak artikel Wikipedia Bahasa Indonesia untuk tokoh ini
+        OPTIONAL {
+          ?govWiki schema:about ?govItem ;
+                   schema:isPartOf <https://id.wikipedia.org/> .
+        }
+        
+        # Gabungkan Data: Nama | Tahun | URL (Jika tidak ada URL, isi dengan kata "kosong")
+        BIND(CONCAT(STR(?govLabel), "|", STR(YEAR(?govDate)), "|", IF(BOUND(?govWiki), STR(?govWiki), "kosong")) AS ?govData)
       }
     `;
   }
