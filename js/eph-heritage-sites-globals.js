@@ -98,6 +98,7 @@ WHERE {
         ?p wdt:P131 <PLACEHOLDER_NEGARA> .
       }
     }
+    ORDER BY ?s ?p ?l
     <PLACEHOLDER_LIMIT_OFFSET>
   }
   OPTIONAL {
