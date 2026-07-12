@@ -819,35 +819,34 @@ record.mapMarker = mapMarker;
       mapMarker.bindPopup(record.title, { 
         closeButton: false,
         maxWidth: 200,
-        togglePopup: false 
+        togglePopup: false // <--- WAJIB: Agar klik kedua tidak menutup popup
       });
 
       // =======================================================
-      // +++ LOGIKA KLIK KEDUA (PENGUNCI STATUS) +++
+      // +++ LOGIKA KLIK KEDUA (TRIK JEDA LEAFLET) +++
       // =======================================================
       
-      // Kita buat bendera status langsung di objek marker
-      mapMarker._statusPopup = 'tertutup'; // Status awal
-
+      // A. Saat popup terbuka, tandai bahwa ia "Baru Saja Dibuka"
       mapMarker.on('popupopen', function() {
-        // Saat terbuka, kita beri jeda sebentar agar klik pertama tidak dianggap klik kedua
-        this._statusPopup = 'terbuka'; 
+        this._baruSajaDibuka = true;
+        
+        // Setelah 300 milidetik, hapus tandanya (berarti sudah siap untuk klik kedua)
+        setTimeout(() => {
+          this._baruSajaDibuka = false;
+        }, 300);
       });
 
-      mapMarker.on('popupclose', function() {
-        this._statusPopup = 'tertutup';
-      });
-
+      // B. Saat marker diklik, lakukan pengecekan
       mapMarker.on('click', function() {
-        // Jika statusnya terbuka, itu berarti ini adalah KLIK KEDUA
-        if (this._statusPopup === 'terbuka') {
+        
+        // Cek: Apakah popupnya sudah terbuka? DAN apakah usianya sudah lebih dari 300ms?
+        // Jika _baruSajaDibuka bernilai FALSE, berarti ini SAH adalah klik kedua!
+        if (this.isPopupOpen() && this._baruSajaDibuka === false) {
           
-          // TARIK PANEL KE ATAS (Gunakan setTimeout kecil agar tidak bentrok dengan Leaflet)
-          setTimeout(() => {
-            if (typeof window.setMobilePanelExpanded === 'function') {
-              window.setMobilePanelExpanded(true);
-            }
-          }, 100);
+          // Tarik panel mobile ke atas
+          if (typeof window.setMobilePanelExpanded === 'function') {
+            window.setMobilePanelExpanded(true);
+          }
           
         }
       });
