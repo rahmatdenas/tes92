@@ -816,39 +816,42 @@ function populateMapAndIndex() {
       );
 record.mapMarker = mapMarker;
       
-      mapMarker.bindPopup(record.title, { 
+mapMarker.bindPopup(record.title, { 
         closeButton: false,
         maxWidth: 200,
-        togglePopup: false // <--- WAJIB: Agar klik kedua tidak menutup popup
+        togglePopup: false // <--- Wajib agar klik kedua tidak menutup popup
       });
 
       // =======================================================
-      // +++ LOGIKA KLIK KEDUA (TRIK JEDA LEAFLET) +++
+      // +++ LOGIKA KLIK KEDUA (BENDERA STATUS) +++
       // =======================================================
       
-      // A. Saat popup terbuka, tandai bahwa ia "Baru Saja Dibuka"
-      mapMarker.on('popupopen', function() {
-        this._baruSajaDibuka = true;
-        
-        // Setelah 300 milidetik, hapus tandanya (berarti sudah siap untuk klik kedua)
-        setTimeout(() => {
-          this._baruSajaDibuka = false;
-        }, 300);
+      // 1. Saat popup tertutup karena klik tempat lain (Reset ke kondisi awal)
+      mapMarker.on('popupclose', function() {
+        this._sudahDiklikSekali = false;
       });
 
-      // B. Saat marker diklik, lakukan pengecekan
+      // 2. Deteksi setiap klik pada marker
       mapMarker.on('click', function() {
         
-        // Cek: Apakah popupnya sudah terbuka? DAN apakah usianya sudah lebih dari 300ms?
-        // Jika _baruSajaDibuka bernilai FALSE, berarti ini SAH adalah klik kedua!
-        if (this.isPopupOpen() && this._baruSajaDibuka === false) {
+        // Jika belum ada bendera (berarti ini KLIK PERTAMA)
+        if (!this._sudahDiklikSekali) {
+          // Pasang bendera agar sistem ingat.
+          // Mesin bawaan Leaflet akan otomatis membuka popup-nya di sini.
+          this._sudahDiklikSekali = true; 
+        } 
+        
+        // Jika bendera sudah ada (berarti ini KLIK KEDUA, KETIGA, dst)
+        else {
+          // A. Panggil data Wikipedia dan gambar
+          displayRecordDetails(qid); 
           
-          // Tarik panel mobile ke atas
+          // B. Panggil fungsi dari JS Responsif Anda untuk menarik panel ke atas
           if (typeof window.setMobilePanelExpanded === 'function') {
             window.setMobilePanelExpanded(true);
           }
-          
         }
+        
       });
       // =======================================================
 
