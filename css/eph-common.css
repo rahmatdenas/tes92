@@ -256,6 +256,11 @@ optgroup option { padding-left: 10px; }
   color: #fff;
 }
 
+.disabled {
+pointer-events: none;
+cursor: not-allowed;
+}
+
 .feat-btn.active {
   background-color: #822;
   color: #fff;
