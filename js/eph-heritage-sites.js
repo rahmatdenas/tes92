@@ -107,7 +107,7 @@ populateProvinceTypesData()
     if (loadingDesc && isFetching) {
        loadingDesc.innerHTML = `Data yang ditarik terlalu banyak. Harap menunggu, 3-5 menit lagi...`;
     }
-  }, 20000);
+  }, 10000);
        
        console.error("Data utama gagal dimuat. Cek koneksi atau server Wikidata.", error);
     }); 
