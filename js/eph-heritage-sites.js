@@ -855,6 +855,23 @@ mapMarker.bindPopup(record.title, {
         }
       });
       // =======================================================
+          let popup = mapMarker.getPopup();
+      popup._qid = qid;
+      record.popup = popup;
+      mapMarkers.push(mapMarker);
+    }
+    
+    let li = document.createElement('li');
+    let a = document.createElement('a');
+    a.href = '#' + qid;
+    
+    // Gunakan textContent agar karakter aneh < > " dari Wikidata
+    // diubah menjadi teks biasa (aman dari kerusakan HTML)
+    a.textContent = record.indexTitle; 
+    
+    li.appendChild(a);
+    record.indexLi = li;
+  });
   
   populateProvinceIndexNodes(); 
   generateFilterSelect();
