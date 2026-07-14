@@ -255,15 +255,24 @@ function updateLabel(expanded) {
         e.preventDefault();
       }
     });
+let targetNavigasi = '#nav-standar a:not(#btn-menu-induk), #nav-detail a[href="#hasil"]';
 
-document.querySelectorAll('#nav-standar a:not(#btn-menu-induk), #nav-detail a').forEach(function(btnNav) {
-      btnNav.addEventListener('click', function() {
-        if (isMobile() && window.setMobilePanelExpanded) {
-          // Setiap kali menu apa pun diklik, paksa panel meluncur naik dan sinkronkan labelnya!
-          window.setMobilePanelExpanded(true);
-        }
-      });
-    });
+document.querySelectorAll(targetNavigasi).forEach(function(btnNav) {
+  btnNav.addEventListener('click', function(e) {
+    let hrefVal = this.getAttribute('href');
+
+    // 1. Jika di mobile, perintahkan panel naik dengan animasi mulus
+    if (isMobile() && window.setMobilePanelExpanded) {
+      window.setMobilePanelExpanded(true);
+    }
+    if (hrefVal && hrefVal.startsWith('#')) {
+      e.preventDefault(); 
+      if (window.location.hash !== hrefVal) {
+        window.location.hash = hrefVal;
+      }
+    }
+  });
+});
     
   });
 
