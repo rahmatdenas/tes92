@@ -227,6 +227,7 @@ nav li.active > a, nav li > a.active {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
+  color: #611;  
 }
 
 .filter-box select {
