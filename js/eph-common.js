@@ -671,7 +671,7 @@ function processHashChange() {
               Anda belum melakukan pencarian. Silakan kembali ke halaman Beranda untuk memilih entitas yang ingin dieksplorasi.</p>
               <a href="#" style="background-color: #882222; color: #fff; 
               padding: 10px 20px; text-decoration: none; border-radius: 5px; 
-              font-weight: 800; display: inline-block;">Pilih Data</a>
+              font-weight: 600; display: inline-block;">Pilih Data</a>
             </div>
           `; // href="#" agar memicu kembali ke Beranda murni
         }
