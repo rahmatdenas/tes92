@@ -957,7 +957,7 @@ function jalankanFilterGPS(selectElem) {
       lon: e.latlng.lng
     };
 
-    selectElem.options[selectElem.selectedIndex].text = "📍 Sekitar Anda (Radius 10 km)";
+    selectElem.options[selectElem.selectedIndex].text = "Sekitar Anda (Radius 10 km)";
     currentRegionFilter = 'terdekat';
 
     // Bersihkan lingkaran 10km lama jika ada
@@ -1000,7 +1000,7 @@ function batalkanFilterGPS(selectElem) {
   userLocation = null;
 
   let opsi = Array.from(selectElem.options).find(opt => opt.value === 'terdekat');
-  if (opsi) opsi.text = "📍 Sekitar Anda (Radius 10 km)";
+  if (opsi) opsi.text = "Sekitar Anda (Radius 10 km)";
 
   applyIntersectionFilter();
 }
