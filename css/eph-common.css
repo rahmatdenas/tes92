@@ -168,7 +168,7 @@ nav li a {
   text-decoration: none;
   text-transform: uppercase;
   color: #bf9090;
-  transition: color 0.3s;
+  transition: color 0.2s;
 }
 
 nav li a:hover,
