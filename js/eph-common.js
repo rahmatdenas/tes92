@@ -588,7 +588,7 @@ if (logoBranding) {
   // Matikan lampu logo setelah 600 milidetik (0.6 detik)
   setTimeout(() => {
     logoBranding.classList.remove('nyala-sementara');
-  }, 600);
+  }, 300);
 }
 
   let fragment = window.location.hash.replace('#', '');
