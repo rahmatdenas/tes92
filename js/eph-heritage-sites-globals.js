@@ -211,8 +211,15 @@ let whereClause = `
   VALUES ?site { wd:${qid} }
   OPTIONAL {
     ?site wdt:P31 ?tipeVal .
-    ?tipeVal rdfs:label ?tipeLabel .
-    FILTER(LANG(?tipeLabel) = "id")
+    
+    # 1. Coba ambil label Indonesianya dulu
+    OPTIONAL {
+      ?tipeVal rdfs:label ?tipeLabelId .
+      FILTER(LANG(?tipeLabelId) = "id")
+    }
+    
+    # 2. Jika kosong, potong URL dan ambil Q-ID-nya
+    BIND(COALESCE(?tipeLabelId, REPLACE(STR(?tipeVal), "^.*/", "")) AS ?tipeLabel)
   }
   OPTIONAL { ?site wdt:P2044 ?ketinggianVal . }
   OPTIONAL {
