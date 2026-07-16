@@ -59,7 +59,7 @@ input, textarea, select {
 
 .efeklogo {
   opacity: 0.6;
-  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  transition: opacity 0.15s ease-in-out, transform 0.15s ease-in-out;
 }
 
 .efeklogo:hover, 
@@ -575,7 +575,7 @@ height: 16px;
   border: 2px solid #fff;
   width: 150px;
   max-height: 800px;
-  transition: max-height 0.8s ease-in-out;
+  transition: max-height 0.3s ease-in-out;
   object-fit: cover;
 }
 
