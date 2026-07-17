@@ -290,7 +290,7 @@ let targetNavigasi = '#nav-standar a:not(#btn-menu-induk), #nav-detail a[href="#
 
         if (hrefVal && hrefVal.startsWith('#')) {
           e.preventDefault();
-
+e.stopPropagation();
           // Normalisasi hash agar Beranda (kosong) dan '#' dianggap sama
           let currentHash = window.location.hash || '#';
           let targetHash = hrefVal === '#' ? '#' : hrefVal;
