@@ -292,38 +292,49 @@ let targetNavigasi = '#nav-standar a:not(#btn-menu-induk), #nav-detail a[href="#
           e.preventDefault();
           e.stopPropagation(); // Mencegah bentrok dengan JS 1
 
-          // Normalisasi hash agar Beranda (kosong) dan '#' dianggap sama
           let currentHash = window.location.hash || '#';
           let targetHash = hrefVal === '#' ? '#' : hrefVal;
 
-          if (isMobile() && window.setMobilePanelExpanded) {
-            let isCurrentlyExpanded = currentY < 50;
+          // ======================================================
+          // JIKA TOMBOL BERANDA YANG DIKLIK
+          // ======================================================
+          if (targetHash === '#') {
+             // Konfirmasi Sinkron Anti-Blokir Safari
+             if (typeof PrimaryDataIsLoaded !== 'undefined' && (PrimaryDataIsLoaded || isFetching)) {
+                let yakin = confirm("Kembali ke beranda dapat membersihkan data yang sedang/sudah dimuat dan Anda harus menarik data lagi. Anda yakin?");
+                if (!yakin) return; // Batal klik
+             }
+             
+             // Jika lanjut, reset tampilan panel HP
+             if (isMobile() && window.setMobilePanelExpanded) window.setMobilePanelExpanded(true);
+             
+             // Reset fungsi app seketika
+             if (typeof lastValidHash !== 'undefined') lastValidHash = 'landing';
+             history.replaceState(null, null, window.location.pathname); 
+             if (typeof resetApp === 'function') resetApp();
+             
+             let judulWeb = typeof BASE_TITLE !== 'undefined' ? BASE_TITLE : '';
+             document.title = 'Mulai – ' + judulWeb;
+             
+             if (typeof displayPanelContent === 'function') displayPanelContent('landing');
+             if (typeof updateNavigationUI === 'function') updateNavigationUI('');
+             
+             return; // Selesai untuk tugas Beranda
+          }
+          // ======================================================
 
+          // LOGIKA UNTUK MENU LAINNYA (Misal: Tab Hasil)
+          if (isMobile() && window.setMobilePanelExpanded) {
+            let isCurrentlyExpanded = typeof currentY !== 'undefined' && currentY < 50;
             if (currentHash === targetHash) {
-              // Jika diklik di halaman yang sama, fungsikan sebagai sakelar buka/tutup
               window.setMobilePanelExpanded(!isCurrentlyExpanded);
             } else {
-              // Pindah ke tab baru
               window.setMobilePanelExpanded(true);
-              
-              // === KUNCI ANTI-MACET SAFARI ===
-              if (targetHash === '#') {
-                history.pushState(null, null, window.location.pathname);
-                if (typeof processHashChange === 'function') processHashChange();
-              } else {
-                window.location.hash = hrefVal;
-              }
+              window.location.hash = hrefVal;
             }
           } else {
-            // Mode Desktop: Langsung ganti hash jika berbeda
             if (currentHash !== targetHash) {
-              // === KUNCI ANTI-MACET SAFARI ===
-              if (targetHash === '#') {
-                history.pushState(null, null, window.location.pathname);
-                if (typeof processHashChange === 'function') processHashChange();
-              } else {
-                window.location.hash = hrefVal;
-              }
+              window.location.hash = hrefVal;
             }
           }
         }
