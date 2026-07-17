@@ -62,18 +62,19 @@ function init() {
   setupLandingForm();
   window.addEventListener('hashchange', processHashChange);
 
-  document.addEventListener('click', function(e) {
+document.addEventListener('click', function(e) {
     let link = e.target.closest('a');
     
     // Jika yang diklik adalah link Beranda (href="#")
     if (link && link.getAttribute('href') === '#') {
+      e.preventDefault(); 
       
-      // Jika URL saat ini memang sudah kosong atau "#", browser sering mengabaikan klik.
-      // Maka kita cegah sikap diam browser dan paksa panggil fungsinya.
-      if (window.location.hash === '' || window.location.hash === '#') {
-        e.preventDefault(); 
-        processHashChange();
-      }
+      // JANGAN KASIH KESEMPATAN SAFARI BERPIKIR.
+      // Hapus hash secara paksa lewat mesin terdalamnya (History API):
+      history.pushState(null, null, window.location.pathname);
+      
+      // Paksa panggil fungsi render kita secara manual:
+      if (typeof processHashChange === 'function') processHashChange();
     }
   });
 
