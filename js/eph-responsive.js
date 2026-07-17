@@ -290,28 +290,40 @@ let targetNavigasi = '#nav-standar a:not(#btn-menu-induk), #nav-detail a[href="#
 
         if (hrefVal && hrefVal.startsWith('#')) {
           e.preventDefault();
-e.stopPropagation();
+          e.stopPropagation(); // Mencegah bentrok dengan JS 1
+
           // Normalisasi hash agar Beranda (kosong) dan '#' dianggap sama
           let currentHash = window.location.hash || '#';
           let targetHash = hrefVal === '#' ? '#' : hrefVal;
 
           if (isMobile() && window.setMobilePanelExpanded) {
-            // Cek status panel saat ini (karena ada di scope yang sama, kita bisa baca currentY)
             let isCurrentlyExpanded = currentY < 50;
 
             if (currentHash === targetHash) {
-              // KONDISI 1: Pengguna mengklik tombol dari halaman yang sedang aktif.
-              // Jadikan tombol berfungsi ganda seperti Handle (Sakelar Naik/Turun).
+              // Jika diklik di halaman yang sama, fungsikan sebagai sakelar buka/tutup
               window.setMobilePanelExpanded(!isCurrentlyExpanded);
             } else {
-              // Pindah ke tab baru: Paksa panel naik dan ganti URL.
+              // Pindah ke tab baru
               window.setMobilePanelExpanded(true);
-              window.location.hash = hrefVal;
+              
+              // === KUNCI ANTI-MACET SAFARI ===
+              if (targetHash === '#') {
+                history.pushState(null, null, window.location.pathname);
+                if (typeof processHashChange === 'function') processHashChange();
+              } else {
+                window.location.hash = hrefVal;
+              }
             }
           } else {
             // Mode Desktop: Langsung ganti hash jika berbeda
-            if (window.location.hash !== hrefVal) {
-              window.location.hash = hrefVal;
+            if (currentHash !== targetHash) {
+              // === KUNCI ANTI-MACET SAFARI ===
+              if (targetHash === '#') {
+                history.pushState(null, null, window.location.pathname);
+                if (typeof processHashChange === 'function') processHashChange();
+              } else {
+                window.location.hash = hrefVal;
+              }
             }
           }
         }
