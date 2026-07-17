@@ -585,66 +585,30 @@ function enableApp() {
 }
 
 function processHashChange() {
-  // 1. CEGATAN MUNDUR: Jika kita sedang dalam proses mengembalikan URL karena pengguna 
-  // menekan "Batal", abaikan siklus ini agar tidak terjadi infinite loop.
   if (isRevertingHash) {
     isRevertingHash = false;
     return; 
   }
 
   let logoBranding = document.getElementById('branding-icon');
-if (logoBranding) {
-  logoBranding.classList.add('nyala-sementara');
-  // Matikan lampu logo setelah 600 milidetik (0.6 detik)
-  setTimeout(() => {
-    logoBranding.classList.remove('nyala-sementara');
-  }, 300);
-}
+  if (logoBranding) {
+    logoBranding.classList.add('nyala-sementara');
+    setTimeout(() => { logoBranding.classList.remove('nyala-sementara'); }, 300);
+  }
 
   let fragment = window.location.hash.replace('#', '');
-
-  // Jangan paksa panel terbuka di mobile saat baru dimuat
   if (typeof window.setMobilePanelExpanded === 'function') {
     isAppInitialLoad = false; 
   }
 
-  // =================================================================
-  // 2. KOTAK KONFIRMASI (Bekerja mulus di Safari & Chrome)
-  // =================================================================
+  // --- KOTAK KONFIRMASI SUDAH DIPINDAHKAN DARI SINI ---
   
-  // Jika pengguna mencoba ke Beranda (fragment kosong) TAPI ada data yang sudah/sedang ditarik
-// Jika pengguna mencoba ke Beranda (fragment kosong) TAPI ada data yang sudah/sedang ditarik
-  if (fragment === '' && (PrimaryDataIsLoaded || isFetching)) {
-    
-    // PERBAIKAN: Hapus setTimeout. Safari iOS akan memblokir confirm() secara diam-diam
-    // jika berada di dalam callback asinkron setelah navigasi history (tombol back Safari).
-    let yakin = confirm("Kembali ke beranda dapat membersihkan data yang sedang/sudah dimuat dan Anda harus menarik data lagi. Anda yakin?");
-    
-    if (yakin) {
-      // JIKA YA: Bersihkan semua dan kembali ke Beranda murni
-      lastValidHash = 'landing';
-      resetApp();
-      document.title = 'Mulai – ' + BASE_TITLE;
-      displayPanelContent('landing');
-      updateNavigationUI(''); 
-    } else {
-      // JIKA BATAL: Kembalikan URL ke posisi sebelumnya secara diam-diam
-      isRevertingHash = true;
-      window.location.hash = lastValidHash === 'landing' ? '' : lastValidHash;
-    }
-    
-    return; // Hentikan eksekusi fungsi di sini! Jangan teruskan ke bawah.
-  }
-
-  // =================================================================
-  // Jika tidak ada halangan atau bukan menuju Beranda, jalankan normal
-  // =================================================================
-
   updateNavigationUI(fragment);
 
   if (fragment === '') {
-    // BERANDA NORMAL (Tidak ada data ditarik, murni baru buka web)
+    // BERANDA NORMAL 
     lastValidHash = 'landing';
+    history.replaceState(null, null, window.location.pathname); 
     resetApp(); 
     document.title = 'Mulai – ' + BASE_TITLE;
     displayPanelContent('landing');
@@ -1188,37 +1152,26 @@ window.addEventListener('load', function() {
   let linkElem = document.getElementById('lightbox-link');
 
   // 2. Tangkap klik pada SEMUA gambar di panel dan popup peta
-  document.addEventListener('click', function(e) {
-    let targetImg = e.target.closest('#details figure img, .leaflet-popup-content img');
+ document.addEventListener('click', function(e) {
+    let link = e.target.closest('a');
     
-    if (targetImg) {
+    // Jika yang diklik adalah link Beranda (href="#")
+    if (link && link.getAttribute('href') === '#') {
       e.preventDefault(); 
-
-      let srcGambar = targetImg.src;
-      let linkKeCommons = '';
-      let parentLink = targetImg.closest('a');
       
-      if (parentLink) {
-        linkKeCommons = parentLink.href;
-      } else {
-        let namaFileRaw = srcGambar.split('Special:FilePath/')[1];
-        if (namaFileRaw) {
-          let namaFileBersih = namaFileRaw.split('?')[0]; 
-          linkKeCommons = 'https://commons.wikimedia.org/wiki/File:' + namaFileBersih;
-        }
+      // 1. MUNCULKAN KONFIRMASI DI SINI (Safari dijamin tidak akan memblokirnya)
+      if (PrimaryDataIsLoaded || isFetching) {
+        let yakin = confirm("Kembali ke beranda dapat membersihkan data yang sedang/sudah dimuat dan Anda harus menarik data lagi. Anda yakin?");
+        if (!yakin) return; // Jika batal, berhenti di sini. URL aman.
       }
-
-      if (srcGambar.includes('?width=')) {
-        srcGambar = srcGambar.replace(/\?width=\d+/, '?width=500');
-      }
-
-      imgElem.src = srcGambar;
-      linkElem.href = linkKeCommons || '#'; 
-      lightbox.classList.add('aktif');
-
-      // +++ KUNCI PERBAIKAN TOMBOL BACK +++
-      // Tinggalkan jejak riwayat palsu agar saat tombol Back ditekan, halaman tidak berpindah
-      window.history.pushState({ dalamLightbox: true }, null, window.location.href);
+      
+      // 2. Jika yakin, langsung reset aplikasi seketika!
+      lastValidHash = 'landing';
+      history.replaceState(null, null, window.location.pathname);
+      resetApp();
+      document.title = 'Mulai – ' + BASE_TITLE;
+      displayPanelContent('landing');
+      updateNavigationUI('');
     }
   });
 
