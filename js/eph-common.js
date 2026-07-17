@@ -51,11 +51,31 @@ const ikonTetesanAir = L.divIcon({
 });
 
 window.addEventListener('load', init);
+window.addEventListener('pageshow', function(e) {
+  if (e.persisted) {
+    processHashChange();
+  }
+});
 
 function init() {
   initMap();
   setupLandingForm();
   window.addEventListener('hashchange', processHashChange);
+
+  document.addEventListener('click', function(e) {
+    let link = e.target.closest('a');
+    
+    // Jika yang diklik adalah link Beranda (href="#")
+    if (link && link.getAttribute('href') === '#') {
+      
+      // Jika URL saat ini memang sudah kosong atau "#", browser sering mengabaikan klik.
+      // Maka kita cegah sikap diam browser dan paksa panggil fungsinya.
+      if (window.location.hash === '' || window.location.hash === '#') {
+        e.preventDefault(); 
+        processHashChange();
+      }
+    }
+  });
 
   // =========================================================
   // LANGKAH B: LOGIKA BUKA-TUTUP MENU DROP-UP
@@ -592,27 +612,25 @@ if (logoBranding) {
   // =================================================================
   
   // Jika pengguna mencoba ke Beranda (fragment kosong) TAPI ada data yang sudah/sedang ditarik
+// Jika pengguna mencoba ke Beranda (fragment kosong) TAPI ada data yang sudah/sedang ditarik
   if (fragment === '' && (PrimaryDataIsLoaded || isFetching)) {
     
-    // Jeda 50ms memberikan waktu bagi browser (terutama Safari) untuk menyelesaikan 
-    // antrean animasi UI sebelum dibekukan oleh kotak dialog confirm()
-    setTimeout(() => {
-      let yakin = confirm("Kembali ke beranda dapat membersihkan data yang sedang/sudah dimuat dan Anda harus menarik data lagi. Anda yakin?");
-      
-      if (yakin) {
-        // JIKA YA: Bersihkan semua dan kembali ke Beranda murni
-        lastValidHash = 'landing';
-        history.replaceState(null, null, window.location.pathname);
-        resetApp();
-        document.title = 'Mulai – ' + BASE_TITLE;
-        displayPanelContent('landing');
-        updateNavigationUI(''); 
-      } else {
-        // JIKA BATAL: Kembalikan URL ke posisi sebelumnya secara diam-diam
-        isRevertingHash = true;
-        window.location.hash = lastValidHash === 'landing' ? '' : lastValidHash;
-      }
-    }, 50);
+    // PERBAIKAN: Hapus setTimeout. Safari iOS akan memblokir confirm() secara diam-diam
+    // jika berada di dalam callback asinkron setelah navigasi history (tombol back Safari).
+    let yakin = confirm("Kembali ke beranda dapat membersihkan data yang sedang/sudah dimuat dan Anda harus menarik data lagi. Anda yakin?");
+    
+    if (yakin) {
+      // JIKA YA: Bersihkan semua dan kembali ke Beranda murni
+      lastValidHash = 'landing';
+      resetApp();
+      document.title = 'Mulai – ' + BASE_TITLE;
+      displayPanelContent('landing');
+      updateNavigationUI(''); 
+    } else {
+      // JIKA BATAL: Kembalikan URL ke posisi sebelumnya secara diam-diam
+      isRevertingHash = true;
+      window.location.hash = lastValidHash === 'landing' ? '' : lastValidHash;
+    }
     
     return; // Hentikan eksekusi fungsi di sini! Jangan teruskan ke bawah.
   }
@@ -626,7 +644,6 @@ if (logoBranding) {
   if (fragment === '') {
     // BERANDA NORMAL (Tidak ada data ditarik, murni baru buka web)
     lastValidHash = 'landing';
-    history.replaceState(null, null, window.location.pathname); 
     resetApp(); 
     document.title = 'Mulai – ' + BASE_TITLE;
     displayPanelContent('landing');
